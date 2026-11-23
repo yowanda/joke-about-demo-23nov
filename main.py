@@ -15,11 +15,18 @@ JOKE = (
 
 
 def main() -> None:
+    # Runtime guard (revision pass): the gate requires 1-280 Unicode
+    # code points and non-whitespace-only text. Validate before writing.
+    if not 1 <= len(JOKE) <= 280:
+        raise ValueError(f"joke length {len(JOKE)} outside 1-280 characters")
+    if not JOKE.strip():
+        raise ValueError("joke must not be whitespace-only")
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
-        f.write(JOKE)
+    # Deterministic write: one fixed write of the exact bytes.
+    with open(path, "wb") as f:
+        f.write(JOKE.encode("utf-8"))
 
 
 if __name__ == "__main__":
